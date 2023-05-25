@@ -7,6 +7,26 @@ Using AWS Lambda, batch, EC2, AWS ParallelCluster and API Gateway to create a ma
 
 ![Schema](schema.png)
 
+## About AWS Lambda
+
+AWS Lambda is a serverless computing service provided by Amazon as part of the Amazon Web Services. It is a computing service that runs code in response to events and automatically manages the computing resources required by that code. It was introduced in November 2014. The purpose of Lambda, as compared to AWS EC2, is to simplify building smaller, on-demand applications that are responsive to events and new information. AWS targets starting a Lambda instance within milliseconds of an event. Node.js, Python, Java, Go, Ruby, and C# through .NET Core are all officially supported as of 2018, and other languages can be supported via call-outs. However, some runtimes, such as the .NET Core, are only supported in a "preview" mode as of 2018.
+
+## Objectives
+
+- C+: Working environment with AWS Lambda, batch, EC2 and documentation
+
+- B+: Working environment with AWS Lambda, batch, EC2, API Gateway, S3 and documentation
+
+- A+: Working environment with a machine learning container of production inside S3 bucket
+
+Done with AWS Lambda, batch, EC2, API Gateway, S3 and documentation - B+
+
+## Changes made to the project to achieve the objectives using terraform
+
+In this project, I used terraform to create the infrastructure, so I made some changes to the project to make it work with terraform. That way, I didn't use the AWS ParallelCluster, which wasn't in the rubric but was crucial to the proposed project.
+
+That way, this project is more focused on the use of AWS Lambda, batch, EC2, API Gateway, S3 and documentation. Also with the use of terraform and AWS CLI. In this tutorial, You will be able to create a lambda function that will be triggered by an API Gateway, which will send a job to the AWS Batch, which will run the job in an EC2 instance, which will save the result in an S3 bucket. All this using terraform and AWS CLI. In the end, you will be able to test the project using a python hello world script.
+
 ## Install Terraform
 
 ### Linux
