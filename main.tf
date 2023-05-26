@@ -1,29 +1,34 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
 
+# Configure the AWS Provider
 provider "aws" {
   region = var.aws_region
   profile = var.aws_profile_name
 }
 
+# Define the project name
 locals {
   project_name = "lambda-batch-tf"
 
 }
 
+# Define the VPC CIDR
 data "aws_caller_identity" "caller" {}
 data "aws_partition" "partition" {}
 
-
+# Create a random pet name to avoid naming conflicts
 resource "random_pet" "lambda_bucket_name" {
   prefix = "learn-terraform-functions"
   length = 4
 }
 
+# Create an S3 bucket to hold the Lambda code
 resource "aws_s3_bucket" "lambda_bucket" {
   bucket = random_pet.lambda_bucket_name.id
 }
 
+# Create an archive file of the Lambda code
 data "archive_file" "lambda_hello_world" {
   type = "zip"
 
@@ -31,6 +36,7 @@ data "archive_file" "lambda_hello_world" {
   output_path = "${path.module}/hello-world.zip"
 }
 
+# Create an S3 object to hold the Lambda code
 resource "aws_s3_object" "lambda_hello_world" {
   bucket = aws_s3_bucket.lambda_bucket.id
 
@@ -40,6 +46,7 @@ resource "aws_s3_object" "lambda_hello_world" {
   etag = filemd5(data.archive_file.lambda_hello_world.output_path)
 }
 
+# Create the Lambda function, a Hello World in Python
 resource "aws_lambda_function" "hello_world" {
   function_name = "HelloWorld"
 
@@ -54,12 +61,14 @@ resource "aws_lambda_function" "hello_world" {
   role = aws_iam_role.lambda_exec.arn
 }
 
+# Create a CloudWatch Log Group for the Lambda function
 resource "aws_cloudwatch_log_group" "hello_world" {
   name = "/aws/lambda/${aws_lambda_function.hello_world.function_name}"
 
   retention_in_days = 30
 }
 
+# Create an IAM role for the Lambda function
 resource "aws_iam_role" "lambda_exec" {
   name = "serverless_lambda"
 
@@ -77,17 +86,19 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
+# Attach the AWSLambdaBasicExecutionRole policy to the IAM role
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-
+# Create an API Gateway
 resource "aws_apigatewayv2_api" "lambda" {
   name          = "serverless_lambda_gw"
   protocol_type = "HTTP"
 }
 
+# Create a stage for the API Gateway
 resource "aws_apigatewayv2_stage" "lambda" {
   api_id = aws_apigatewayv2_api.lambda.id
 
@@ -113,6 +124,7 @@ resource "aws_apigatewayv2_stage" "lambda" {
   }
 }
 
+# Create an API Gateway integration
 resource "aws_apigatewayv2_integration" "hello_world" {
   api_id = aws_apigatewayv2_api.lambda.id
 
@@ -121,6 +133,7 @@ resource "aws_apigatewayv2_integration" "hello_world" {
   integration_method = "POST"
 }
 
+# Create an API Gateway route
 resource "aws_apigatewayv2_route" "hello_world" {
   api_id = aws_apigatewayv2_api.lambda.id
 
@@ -128,12 +141,14 @@ resource "aws_apigatewayv2_route" "hello_world" {
   target    = "integrations/${aws_apigatewayv2_integration.hello_world.id}"
 }
 
+# Create a CloudWatch Log Group for the API Gateway
 resource "aws_cloudwatch_log_group" "api_gw" {
   name = "/aws/api_gw/${aws_apigatewayv2_api.lambda.name}"
 
   retention_in_days = 30
 }
 
+# Create a Lambda permission for the API Gateway
 resource "aws_lambda_permission" "api_gw" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
