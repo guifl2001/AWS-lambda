@@ -436,7 +436,7 @@ terraform apply
 Now we will be asked if we want to apply the changes, type **yes** and wait for the process to finish. It should look something like this:
 
 ```bash
-Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 26 added, 0 changed, 0 destroyed.
 
 Outputs:
 
